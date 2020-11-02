@@ -1,1 +1,1 @@
-"# cinema-management" 
+# cinema-management
