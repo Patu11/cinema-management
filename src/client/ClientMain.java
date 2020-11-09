@@ -11,9 +11,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
@@ -24,6 +27,7 @@ public class ClientMain extends Application {
     public void start(Stage primaryStage) throws Exception {
         GridPane gridPane = new GridPane();
         GridPane right = new GridPane();
+        GridPane hallGrid = new GridPane();
         HBox selecting = new HBox(3);
         HBox buttons = new HBox(4);
         HBox counting = new HBox(1);
@@ -57,7 +61,7 @@ public class ClientMain extends Application {
         infoLabel.setStyle("-fx-font-weight: bold;");
 
         selecting.setPadding(new Insets(10));
-        selecting.getChildren().addAll(movieInfo, moviesList, datePicker);
+        selecting.getChildren().addAll(datePicker, movieInfo, moviesList);
         selecting.setAlignment(Pos.CENTER);
 
         buttons.setPadding(new Insets(10));
@@ -97,16 +101,27 @@ public class ClientMain extends Application {
             for (int j = 0; j < columns; j++) {
                 Rectangle rect = new Rectangle(j * size, i * size, size, size);
 
-                rect.setStyle("-fx-fill: red; -fx-stroke: black; -fx-stroke-width: 5;");
+                rect.setStyle("-fx-fill: red; -fx-stroke: black; -fx-stroke-width: 1;");
                 group.getChildren().add(rect);
             }
         }
 
+        StackPane stp = new StackPane();
+        Rectangle temp = new Rectangle(0, 0, 300, 50);
+        Text screen = new Text("Screen");
+        screen.setFont(new Font("Arial", 20));
+        screen.setFill(Color.WHITE);
+        stp.getChildren().addAll(temp, screen);
+
+        hallGrid.add(group, 0, 0);
+        hallGrid.add(stp, 0, 1);
+        hallGrid.setAlignment(Pos.CENTER);
 
         gridPane.setMinSize(width, height);
         gridPane.setPadding(new Insets(10, 10, 10, 10));
         gridPane.setHgap(10);
-        gridPane.add(group, 0, 0);
+        gridPane.add(hallGrid, 0, 0);
+//        gridPane.add(group, 0, 0);
         gridPane.add(right, 1, 0);
 
         primaryStage.setTitle("Client");

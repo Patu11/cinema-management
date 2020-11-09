@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 
 public class App {
     public static void main(String[] args) {
-        CinemaHall cinema = new CinemaHall(5, 9);
+        CinemaHall cinema = new CinemaHall(1, 5, 9);
 
         ExecutorService ex = Executors.newCachedThreadPool();
 

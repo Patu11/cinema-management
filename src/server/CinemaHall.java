@@ -4,14 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CinemaHall {
-    private int HallNumber;
+    private int hallNumber;
     private int[][] seats;
     private int rows;
     private int columns;
     private int availableSeats;
     private List<Movie> listOfMovies;   //for future use
 
-    public CinemaHall(int rows, int columns) {
+    public CinemaHall(int hallNumber, int rows, int columns) {
+        this.hallNumber = hallNumber;
         this.rows = rows;
         this.columns = columns;
         this.seats = new int[this.rows][this.columns];
@@ -34,5 +35,33 @@ public class CinemaHall {
         } else {
             System.out.println(name + " cannot reserve");
         }
+    }
+
+    public int getHallNumber() {
+        return hallNumber;
+    }
+
+    public void setHallNumber(int hallNumber) {
+        this.hallNumber = hallNumber;
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public void setRows(int rows) {
+        this.rows = rows;
+    }
+
+    public int getColumns() {
+        return columns;
+    }
+
+    public void setColumns(int columns) {
+        this.columns = columns;
+    }
+
+    public void addMovie(Movie movie) {
+        this.listOfMovies.add(movie);
     }
 }
