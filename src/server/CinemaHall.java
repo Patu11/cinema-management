@@ -26,17 +26,7 @@ public class CinemaHall {
             Arrays.fill(seat, 0);
         }
     }
-
-    //basic version of reservation
-    public synchronized void reserve(String name, int numberOfSeats) {
-        if (this.availableSeats >= numberOfSeats && numberOfSeats > 0) {
-            System.out.println(name + " reserved " + numberOfSeats + " seats");
-            this.availableSeats -= numberOfSeats;
-        } else {
-            System.out.println(name + " cannot reserve");
-        }
-    }
-
+    
     public int getHallNumber() {
         return hallNumber;
     }
@@ -59,6 +49,18 @@ public class CinemaHall {
 
     public void setColumns(int columns) {
         this.columns = columns;
+    }
+
+    public int getAvailableSeats() {
+        return availableSeats;
+    }
+
+    public void setAvailableSeats(int availableSeats) {
+        this.availableSeats = availableSeats;
+    }
+
+    public void decreaseAvailableSeats(int number) {
+        this.availableSeats -= number;
     }
 
     public void addMovie(Movie movie) {

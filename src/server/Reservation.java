@@ -4,17 +4,22 @@ public class Reservation implements Runnable {
 
     private final CinemaHall cinemaHall;
     private final String name;
-    private final int numberOfSeats;
+    private final int numberOfSeatsToReserve;
 
-    public Reservation(CinemaHall cinemaHall, String name, int numberOfSeats) {
+    public Reservation(CinemaHall cinemaHall, String name, int numberOfSeatsToReserve) {
         this.cinemaHall = cinemaHall;
         this.name = name;
-        this.numberOfSeats = numberOfSeats;
+        this.numberOfSeatsToReserve = numberOfSeatsToReserve;
     }
 
     @Override
     public void run() {
-        this.cinemaHall.reserve(this.name, this.numberOfSeats);
+        if (cinemaHall.getAvailableSeats() >= this.numberOfSeatsToReserve && this.numberOfSeatsToReserve > 0) {
+            System.out.println(this.name + " reserved " + this.numberOfSeatsToReserve + " seats");
+            cinemaHall.decreaseAvailableSeats(this.numberOfSeatsToReserve);
+        } else {
+            System.out.println(this.name + " cannot reserve");
+        }
     }
 }
 

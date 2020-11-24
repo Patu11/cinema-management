@@ -1,17 +1,14 @@
 package server;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 public class App {
     public static void main(String[] args) {
-        CinemaHall cinema = new CinemaHall(1, 5, 9);
+        CinemaHall cinema = new CinemaHall(1, 2, 5);
 
-        ExecutorService ex = Executors.newCachedThreadPool();
+        ReservationAgent reservationAgent = new ReservationAgent();
 
         for (int i = 0; i < 10; i++) {
-            ex.execute(new Reservation(cinema, "Reservation " + i, 5));
+            reservationAgent.reserve(new Reservation(cinema, "Client" + i, 2));
         }
-        ex.shutdownNow();
+        reservationAgent.stop();
     }
 }
