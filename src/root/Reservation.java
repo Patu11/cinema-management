@@ -1,6 +1,8 @@
-package server;
+package root;
 
-public class Reservation implements Runnable {
+import java.io.Serializable;
+
+public class Reservation implements Runnable, Serializable {
 
     private final CinemaHall cinemaHall;
     private final String name;
@@ -20,6 +22,16 @@ public class Reservation implements Runnable {
         } else {
             System.out.println(this.name + " cannot reserve");
         }
+    }
+
+    //for testing
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "cinemaHall=" + cinemaHall +
+                ", name='" + name + '\'' +
+                ", numberOfSeatsToReserve=" + numberOfSeatsToReserve +
+                '}';
     }
 }
 

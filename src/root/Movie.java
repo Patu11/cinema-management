@@ -1,16 +1,17 @@
-package server;
+package root;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.time.LocalDate;
 
 //for future use
-public class Movie {
+public class Movie implements Serializable {
     private String title;
     private int HallNumber;
     private double ticketPrice;
-    private Date startPlaying;
-    private Date stopPlaying;
+    private LocalDate startPlaying;
+    private LocalDate stopPlaying;
 
-    public Movie(String title, int hallNumber, double ticketPrice, Date startPlaying, Date stopPlaying) {
+    public Movie(String title, int hallNumber, double ticketPrice, LocalDate startPlaying, LocalDate stopPlaying) {
         this.title = title;
         HallNumber = hallNumber;
         this.ticketPrice = ticketPrice;
@@ -42,19 +43,19 @@ public class Movie {
         this.ticketPrice = ticketPrice;
     }
 
-    public Date getStartPlaying() {
+    public LocalDate getStartPlaying() {
         return startPlaying;
     }
 
-    public void setStartPlaying(Date startPlaying) {
+    public void setStartPlaying(LocalDate startPlaying) {
         this.startPlaying = startPlaying;
     }
 
-    public Date getStopPlaying() {
+    public LocalDate getStopPlaying() {
         return stopPlaying;
     }
 
-    public void setStopPlaying(Date stopPlaying) {
+    public void setStopPlaying(LocalDate stopPlaying) {
         this.stopPlaying = stopPlaying;
     }
 }

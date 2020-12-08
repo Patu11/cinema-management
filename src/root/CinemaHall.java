@@ -1,15 +1,17 @@
-package server;
+package root;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CinemaHall {
+public class CinemaHall implements Serializable {
     private int hallNumber;
     private int[][] seats;
     private int rows;
     private int columns;
     private int availableSeats;
-    private List<Movie> listOfMovies;   //for future use
+    private List<Movie> listOfMovies = new ArrayList<>();   //for future use
 
     public CinemaHall(int hallNumber, int rows, int columns) {
         this.hallNumber = hallNumber;
@@ -26,7 +28,7 @@ public class CinemaHall {
             Arrays.fill(seat, 0);
         }
     }
-    
+
     public int getHallNumber() {
         return hallNumber;
     }

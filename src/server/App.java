@@ -1,14 +1,29 @@
 package server;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 public class App {
-    public static void main(String[] args) {
-        CinemaHall cinema = new CinemaHall(1, 2, 5);
+    public static void main(String[] args) throws IOException {
+        final int PORT = 34524;
+        ServerSocket socket = new ServerSocket(PORT);
 
-        ReservationAgent reservationAgent = new ReservationAgent();
+        System.out.println("Server on port:" + PORT);
 
-        for (int i = 0; i < 10; i++) {
-            reservationAgent.reserve(new Reservation(cinema, "Client" + i, 2));
+        while (true) {
+            try {
+                Socket client = socket.accept();
+
+                System.out.println("Connection from: " + client.getInetAddress());
+
+                ClientHandlingThread handling = new ClientHandlingThread(client);
+
+                handling.start();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        reservationAgent.stop();
     }
 }
