@@ -13,6 +13,11 @@ public class Hall implements Serializable {
         this.availableSeats = availableSeats;
     }
 
+    public Hall(int seatsNumber, int availableSeats) {
+        this.seatsNumber = seatsNumber;
+        this.availableSeats = availableSeats;
+    }
+
     public int getHallNumber() {
         return hallNumber;
     }

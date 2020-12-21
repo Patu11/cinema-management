@@ -29,6 +29,44 @@ public class MySQLAccess {
         }
     }
 
+    public void insertClient(Client client) throws SQLException {
+        String sql = "INSERT INTO client(first_name, last_name, birth_date) VALUES(?,?,?)";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        preparedStatement.setString(1, client.getFirstName());
+        preparedStatement.setString(2, client.getLastName());
+        preparedStatement.setDate(3, java.sql.Date.valueOf(client.getBirthDate().toString()));
+
+        preparedStatement.executeUpdate();
+    }
+
+    public void insertHall(Hall hall) throws SQLException {
+        String sql = "INSERT INTO hall(seats_number, available_seats) VALUES(?,?)";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+
+        preparedStatement.setInt(1, hall.getSeatsNumber());
+        preparedStatement.setInt(2, hall.getAvailableSeats());
+
+        preparedStatement.executeUpdate();
+    }
+
+    public void insertMovie(Movie movie) throws SQLException {
+        String sql = "INSERT INTO movie(title, age_cat, length, genre,price) VALUES(?,?,?,?,?)";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        preparedStatement.setString(1, movie.getTitle());
+        preparedStatement.setInt(2, movie.getAgeCategory());
+        preparedStatement.setInt(3, movie.getLength());
+        preparedStatement.setString(4, movie.getGenre());
+        preparedStatement.setDouble(5, movie.getPrice());
+
+        preparedStatement.executeUpdate();
+    }
+
     public List<Hall> getAllHalls() throws SQLException {
         resultSet = statement.executeQuery("SELECT * FROM hall");
         ResultSet temp;
@@ -116,22 +154,31 @@ public class MySQLAccess {
     public static void main(String[] args) throws Exception {
         MySQLAccess sql = new MySQLAccess();
 
-        List<Reservation> reservations = sql.getAllReservations();
-        List<Client> clients = sql.getAllClients();
-        List<Movie> movies = sql.getAllMovies();
-        List<Hall> halls = sql.getAllHalls();
+//        List<Reservation> reservations = sql.getAllReservations();
+//        List<Client> clients = sql.getAllClients();
+//        List<Movie> movies = sql.getAllMovies();
+//        List<Hall> halls = sql.getAllHalls();
+//
+//        for (Client c : clients) {
+//            System.out.println(c.toString());
+//        }
+//
+//        for (Movie m : movies) {
+//            System.out.println(m.toString());
+//        }
+//
+//        for (Hall h : halls) {
+//            System.out.println(h.toString());
+//        }
 
-        for (Client c : clients) {
-            System.out.println(c.toString());
-        }
+//        Movie m = new Movie("The Avengers", 12, 120, "Sci-Fi", 2.55);
+//        sql.insertMovie(m);
 
-        for (Movie m : movies) {
-            System.out.println(m.toString());
-        }
+//        Hall h = new Hall(85, 85);
+//        sql.insertHall(h);
 
-        for (Hall h : halls) {
-            System.out.println(h.toString());
-        }
+        Client c = new Client("Kamil", "Slimak", Date.valueOf("1995-05-01"));
+        sql.insertClient(c);
 
         sql.closeConnection();
     }
