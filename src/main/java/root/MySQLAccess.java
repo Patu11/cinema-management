@@ -101,6 +101,26 @@ public class MySQLAccess {
         return list;
     }
 
+    public Movie getMovieByTitle(String t) throws SQLException {
+        String sql = "SELECT * FROM movie WHERE title = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, t);
+
+        resultSet = preparedStatement.executeQuery();
+
+        Movie m = null;
+        while (resultSet.next()) {
+            String title = resultSet.getString("title");
+            int ageCategory = resultSet.getInt("age_cat");
+            int length = resultSet.getInt("length");
+            String genre = resultSet.getString("genre");
+            double price = resultSet.getDouble("price");
+
+            m = new Movie(title, ageCategory, length, genre, price);
+        }
+        return m;
+    }
+
     public List<Client> getAllClients() throws SQLException {
         resultSet = statement.executeQuery("SELECT * FROM client");
         ResultSet temp;
@@ -177,8 +197,11 @@ public class MySQLAccess {
 //        Hall h = new Hall(85, 85);
 //        sql.insertHall(h);
 
-        Client c = new Client("Kamil", "Slimak", Date.valueOf("1995-05-01"));
-        sql.insertClient(c);
+//        Client c = new Client("Kamil", "Slimak", Date.valueOf("1995-05-01"));
+//        sql.insertClient(c);
+
+
+        System.out.println(sql.getMovieByTitle("Matrix"));
 
         sql.closeConnection();
     }
