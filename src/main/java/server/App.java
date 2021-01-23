@@ -17,9 +17,10 @@ public class App {
 
                 System.out.println("Connection from: " + client.getInetAddress());
 
-                ClientHandlingThread handling = new ClientHandlingThread(client);
-
-                handling.start();
+//                ClientHandlingThread handling = new ClientHandlingThread(client);
+//                handling.run();
+                Thread thread = new Thread(new ClientHandlingThread(client));
+                thread.start();
 
             } catch (IOException e) {
                 e.printStackTrace();

@@ -5,45 +5,30 @@ import root.Reservation;
 import java.io.*;
 import java.net.Socket;
 
-public class ClientHandlingThread extends Thread {
+public class ClientHandlingThread implements Runnable {
     private Socket clientSocket;
-    private boolean running;
+    private ObjectInputStream ois;
+    private ReservationAgent reservationAgent;
 
-    public ClientHandlingThread(Socket clientSocket) {
-        super();
+    public ClientHandlingThread(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
-        this.running = true;
+        this.ois = new ObjectInputStream(clientSocket.getInputStream());
+        this.reservationAgent = new ReservationAgent();
     }
 
     @Override
     public void run() {
-        ObjectInputStream ois = null;
-        ReservationAgent reservationAgent = null;
         try {
-            ois = new ObjectInputStream(clientSocket.getInputStream());
-
-            while (running) {
-
-                try {
-                    Reservation res = (Reservation) ois.readObject();
-                    reservationAgent = new ReservationAgent();
-                    reservationAgent.reserve(res);
-                    System.out.println(res.toString());
-                } catch (EOFException e) {
-                    System.out.println("Closed");
-                    reservationAgent.stop();
-                    this.running = false;
-                }
-            }
-
-        } catch (Exception e) {
+            Reservation res = (Reservation) ois.readObject();
+            System.out.println("Resrvation");
+            System.out.println(res.toString());
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             try {
-                ois.close();
-                clientSocket.close();
-                System.out.println("Stopped");
-
+                this.ois.close();
+                this.clientSocket.close();
+                this.reservationAgent.stop();
             } catch (IOException e) {
                 e.printStackTrace();
             }

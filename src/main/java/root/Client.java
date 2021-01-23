@@ -14,6 +14,9 @@ public class Client implements Serializable {
         this.birthDate = birthDate;
     }
 
+    public Client() {
+    }
+
     public String getFirstName() {
         return firstName;
     }

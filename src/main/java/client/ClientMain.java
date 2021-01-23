@@ -1,131 +1,80 @@
 package client;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import root.Hall;
-import root.Movie;
-import root.MySQLAccess;
+import javafx.util.Duration;
+import root.*;
 
+import java.io.IOException;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ClientMain extends Application {
 
-    MySQLAccess sql;
+    private MySQLAccess sql;
+    private GridPane gridPane;
+    private GridPane right;
+    private HBox selecting;
+    private HBox clientInput;
+    private HBox buttons;
+    private HBox counting;
+    private VBox details;
+    private HBox status;
+    private Separator separator;
+    private Separator separator2;
+    private DatePicker datePicker;
+    private DatePicker birthDate;
+    private TextField nameInput;
+    private TextField surnameInput;
+    private ComboBox<Integer> seats;
+    private ComboBox<Integer> halls;
+    private Label movieInfo;
+    private Label counterLabel;
+    private Label infoLabel;
+    private Label titleLabel;
+    private Label dateLabel;
+    private Label costLabel;
+    private Label seatsLabel;
+    private Label hallLabel;
+    private Label statusLabel;
+    private Button reserve;
+    private Button pay;
+    private ComboBox<String> moviesList;
+    private List<String> movieList;
+    private List<Integer> hallList;
+    private ObservableList<Integer> h;
+    private ObservableList<String> items;
+    private int counter;
+    private boolean counterStarted;
+    private Client client;
+    private Reservation reservation;
+    private ReservationSendingThread connection;
 
-    GridPane gridPane;
-    GridPane right;
-    HBox selecting;
-    HBox clientInput;
-    HBox buttons;
-    HBox counting;
-    VBox details;
-    HBox status;
-    Separator separator;
-    Separator separator2;
-    DatePicker datePicker;
-    DatePicker birthDate;
-    TextField nameInput;
-    TextField surnameInput;
-    ComboBox<Integer> seats;
-    ComboBox<Integer> halls;
-    Label movieInfo;
-    Label counter;
-    Label infoLabel;
-    Label titleLabel;
-    Label dateLabel;
-    Label costLabel;
-    Label seatsLabel;
-    Label hallLabel;
-    Label statusLabel;
-    CheckBox checkBox;
-    Button reserve;
-    Button pay;
-    Button cancel;
-    ComboBox<String> moviesList;
-    List<String> movieList;
-    List<Integer> hallList;
-    ObservableList<Integer> h;
-    ObservableList<String> items;
-
-    public ClientMain() throws SQLException, ClassNotFoundException {
+    public ClientMain() throws SQLException, ClassNotFoundException, IOException {
         this.initComponents();
         this.initEvents();
+//        this.connection.start();
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-//        MySQLAccess sql = new MySQLAccess();
-
-//        GridPane gridPane = new GridPane();
-//        GridPane right = new GridPane();
-//        HBox selecting = new HBox(5);
-//        HBox clientInput = new HBox(3);
-//        HBox buttons = new HBox(4);
-//        HBox counting = new HBox(1);
-//        VBox details = new VBox(3);
-//        HBox status = new HBox(1);
-
-//        Separator separator = new Separator(Orientation.HORIZONTAL);
-//        Separator separator2 = new Separator(Orientation.HORIZONTAL);
-//        DatePicker datePicker = new DatePicker();
-//        DatePicker birthDate = new DatePicker();
-//        TextField nameInput = new TextField();
-//        TextField surnameInput = new TextField();
-//        ComboBox<Integer> seats = new ComboBox<>();
-//        ComboBox<Integer> halls = new ComboBox<>();
-
-
-//        Label movieInfo = new Label("Movie: ");
-//        Label counter = new Label("5:00");
-//        Label infoLabel = new Label("Your reservation:");
-//        Label titleLabel = new Label("Title:");
-//        Label dateLabel = new Label("Date:");
-//        Label costLabel = new Label("Cost:");
-//        Label seatsLabel = new Label("Seats:");
-//        Label hallLabel = new Label("Hall:");
-//        Label statusLabel = new Label("STATUS: Waiting for reservation");
-//        CheckBox checkBox = new CheckBox("Discount");
-//        Button reserve = new Button("Reserve");
-//        Button pay = new Button("Pay");
-//        Button cancel = new Button("Cancel");
-//        ComboBox<String> moviesList = new ComboBox<>();
-//        List<String> movieList = sql.getAllMovies().stream().map(Movie::getTitle).collect(Collectors.toList());
-//        List<Integer> hallList = sql.getAllHalls().stream().map(Hall::getHallNumber).collect(Collectors.toList());
-
-//        ObservableList<Integer> h = FXCollections.observableArrayList(hallList);
-//        ObservableList<String> items = FXCollections.observableArrayList(movieList);
-
-//        nameInput.textProperty().addListener((obs, oldText, newText) -> {
-//            titleLabel.setText("Title: " + newText);
-//        });
-//
-//        surnameInput.textProperty().addListener((obs, oldText, newText) -> {
-//            costLabel.setText("Title: " + newText);
-//        });
-
-//        datePicker.valueProperty().addListener((ov, oldv, newv) -> {
-//            dateLabel.setText("Date: " + newv);
-//        });
+    public void start(Stage primaryStage) {
 
 
         moviesList.setItems(items);
@@ -133,18 +82,10 @@ public class ClientMain extends Application {
         seats.getItems().addAll(1, 2, 3, 4);
         seats.setPromptText("Seats");
 
-//        seats.setOnAction(e -> {
-//            seatsLabel.setText("Seats: " + seats.getSelectionModel().getSelectedItem());
-//        });
-
         halls.setItems(h);
         halls.setPromptText("Hall");
 
-//        halls.setOnAction(e -> {
-//            hallLabel.setText("Hall: " + halls.getSelectionModel().getSelectedItem());
-//        });
-
-        counter.setFont(new Font("Arial", 50));
+        counterLabel.setFont(new Font("Arial", 50));
 
         datePicker.setValue(LocalDate.now());
         birthDate.setValue(LocalDate.now());
@@ -153,22 +94,6 @@ public class ClientMain extends Application {
         surnameInput.setPromptText("Last Name");
 
         moviesList.getSelectionModel().selectFirst();
-
-//        moviesList.setOnAction(e -> {
-//            titleLabel.setText("Title: " + moviesList.getSelectionModel().getSelectedItem());
-//            try {
-//                Movie m = sql.getMovieByTitle(moviesList.getSelectionModel().getSelectedItem());
-//                Integer s = seats.getSelectionModel().getSelectedItem();
-//                if (s == null) {
-//
-//                } else {
-//                    costLabel.setText("Price: " + m.getPrice() * s);
-//                }
-//
-//            } catch (SQLException throwables) {
-//                throwables.printStackTrace();
-//            }
-//        });
 
         infoLabel.setStyle("-fx-font-weight: bold;");
 
@@ -181,11 +106,11 @@ public class ClientMain extends Application {
         selecting.setAlignment(Pos.CENTER);
 
         buttons.setPadding(new Insets(10));
-        buttons.getChildren().addAll(reserve, cancel, pay, checkBox);
+        buttons.getChildren().addAll(reserve, pay);
         buttons.setAlignment(Pos.CENTER);
 
         counting.setPadding(new Insets(10));
-        counting.getChildren().add(counter);
+        counting.getChildren().add(counterLabel);
         counting.setAlignment(Pos.CENTER);
 
         details.setPadding(new Insets(10));
@@ -218,16 +143,97 @@ public class ClientMain extends Application {
     }
 
     public void initEvents() {
+
+        this.reserve.setOnAction(actionEvent -> {
+            this.counterStarted = true;
+            this.statusLabel.setText("STATUS: Waiting for payment");
+
+            if (this.nameInput.getText() == null || this.surnameInput.getText() == null || this.seats.getValue() == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Input error");
+                alert.setHeaderText("No data provided");
+                alert.setContentText("Fill all input field");
+                alert.showAndWait().ifPresent(rs -> {
+                });
+            } else {
+
+
+                Hall temp = null;
+                Movie mtemp = null;
+                this.reservation.setClient(this.client);
+                try {
+                    temp = sql.getHallByNumber(this.halls.getSelectionModel().getSelectedItem());
+                    mtemp = sql.getMovieByTitle(this.moviesList.getSelectionModel().getSelectedItem());
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                } catch (NullPointerException nullError) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("SQL error");
+                    alert.setContentText("Cannot connect to database");
+                    alert.showAndWait().ifPresent(rs -> {
+                    });
+                }
+
+                this.client.setFirstName(this.nameInput.getText());
+                this.client.setLastName(this.surnameInput.getText());
+                this.client.setBirthDate(Date.valueOf(this.birthDate.getValue()));
+
+
+                this.reservation.setCinemaHall(temp);
+                this.reservation.setMovie(mtemp);
+                this.reservation.setDate(Date.valueOf(this.datePicker.getValue()));
+                this.reservation.setSeatNumber(this.seats.getValue());
+                this.reservation.setPrice(mtemp.getPrice() * this.seats.getValue());
+
+                this.connection.start();
+                this.connection.send(this.reservation);
+
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Confirm");
+                alert.setHeaderText("Succesfull");
+                alert.setContentText("Reservation saved, now You can pay");
+                alert.showAndWait().ifPresent(rs -> {
+                });
+            }
+        });
+
+        this.pay.setOnAction(actionEvent -> {
+            this.counterStarted = false;
+            this.counter = 60 * 2;
+            this.statusLabel.setText("STATUS: Reservation made");
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirm");
+            alert.setHeaderText("Succesfull");
+            alert.setContentText("Reservation made");
+            alert.showAndWait().ifPresent(rs -> {
+            });
+
+        });
+
         this.datePicker.valueProperty().addListener((ov, oldv, newv) -> {
             this.dateLabel.setText("Date: " + newv);
         });
 
-        this.seats.setOnAction(e -> {
-            this.seatsLabel.setText("Seats: " + this.seats.getSelectionModel().getSelectedItem());
-        });
-
         this.halls.setOnAction(e -> {
             this.hallLabel.setText("Hall: " + this.halls.getSelectionModel().getSelectedItem());
+        });
+
+        this.seats.setOnAction(e -> {
+            this.seatsLabel.setText("Seats: " + this.seats.getSelectionModel().getSelectedItem());
+            try {
+                Movie m = this.sql.getMovieByTitle(this.moviesList.getSelectionModel().getSelectedItem());
+                Integer s = this.seats.getSelectionModel().getSelectedItem();
+                if (s == null) {
+
+                } else {
+                    DecimalFormat df = new DecimalFormat("###.##");
+                    this.costLabel.setText("Price: " + df.format(m.getPrice() * s));
+                }
+
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
         });
 
         this.moviesList.setOnAction(e -> {
@@ -238,16 +244,28 @@ public class ClientMain extends Application {
                 if (s == null) {
 
                 } else {
-                    this.costLabel.setText("Price: " + m.getPrice() * s);
+                    DecimalFormat df = new DecimalFormat("###.##");
+                    this.costLabel.setText("Price: " + df.format(m.getPrice() * s));
                 }
 
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         });
+
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(1.0), e -> {
+                    if (this.counterStarted) {
+                        this.counterLabel.setText("Time to pay: " + this.counter + "s");
+                        this.counter--;
+                    }
+                })
+        );
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
     }
 
-    public void initComponents() throws SQLException, ClassNotFoundException {
+    public void initComponents() throws SQLException, ClassNotFoundException, IOException {
         this.sql = new MySQLAccess();
         this.gridPane = new GridPane();
         this.right = new GridPane();
@@ -266,7 +284,7 @@ public class ClientMain extends Application {
         this.seats = new ComboBox<>();
         this.halls = new ComboBox<>();
         this.movieInfo = new Label("Movie: ");
-        this.counter = new Label("5:00");
+        this.counterLabel = new Label("Time to pay: 120s");
         this.infoLabel = new Label("Your reservation:");
         this.titleLabel = new Label("Title:");
         this.dateLabel = new Label("Date:");
@@ -274,15 +292,18 @@ public class ClientMain extends Application {
         this.seatsLabel = new Label("Seats:");
         this.hallLabel = new Label("Hall:");
         this.statusLabel = new Label("STATUS: Waiting for reservation");
-        this.checkBox = new CheckBox("Discount");
         this.reserve = new Button("Reserve");
         this.pay = new Button("Pay");
-        this.cancel = new Button("Cancel");
         this.moviesList = new ComboBox<>();
         this.movieList = sql.getAllMovies().stream().map(Movie::getTitle).collect(Collectors.toList());
         this.hallList = sql.getAllHalls().stream().map(Hall::getHallNumber).collect(Collectors.toList());
         this.h = FXCollections.observableArrayList(hallList);
         this.items = FXCollections.observableArrayList(movieList);
+        this.counter = 60 * 2;
+        this.counterStarted = false;
+        this.client = new Client();
+        this.reservation = new Reservation();
+        this.connection = new ReservationSendingThread();
     }
 
     public static void main(String[] args) {

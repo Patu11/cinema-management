@@ -16,7 +16,7 @@ public class SocketTest {
         Client client = new Client("John", "Kowalski", Date.valueOf("1997-12-12"));
         Date date = Date.valueOf("2020-12-30");
 
-        Reservation reservation = new Reservation(cinema, client, movie, 15, date);
+        Reservation reservation = new Reservation(cinema, client, movie, 15, date, 20);
 
         ReservationSendingThread res = new ReservationSendingThread();
         res.start();

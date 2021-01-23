@@ -83,6 +83,24 @@ public class MySQLAccess {
         return list;
     }
 
+    public Hall getHallByNumber(int n) throws SQLException {
+        String sql = "SELECT * FROM hall WHERE hall_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, String.valueOf(n));
+
+        resultSet = preparedStatement.executeQuery();
+
+        Hall h = null;
+        while (resultSet.next()) {
+            int number = resultSet.getInt("hall_id");
+            int seats = resultSet.getInt("seats_number");
+            int available = resultSet.getInt("available_seats");
+
+            h = new Hall(number, seats, available);
+        }
+        return h;
+    }
+
     public List<Movie> getAllMovies() throws SQLException {
         resultSet = statement.executeQuery("SELECT * FROM movie");
         ResultSet temp;
@@ -147,7 +165,7 @@ public class MySQLAccess {
             int clientId = resultSet.getInt(4);
             Date reservationDate = resultSet.getDate(5);
             int seatNumber = resultSet.getInt(6);
-
+            int price = resultSet.getInt(7);
 
             temp = statement2.executeQuery("SELECT * FROM hall WHERE hall_id =" + hallId);
             temp.next();
@@ -161,7 +179,7 @@ public class MySQLAccess {
             temp.next();
             Client c = new Client(temp.getString(2), temp.getString(3), temp.getDate(4));
 
-            Reservation r = new Reservation(h, c, m, seatNumber, reservationDate);
+            Reservation r = new Reservation(h, c, m, seatNumber, reservationDate, price);
             list.add(r);
         }
         return list;
