@@ -31,5 +31,4 @@ public class ReservationAgent {
     public void stop() {
         this.executor.shutdown();
     }
-
 }

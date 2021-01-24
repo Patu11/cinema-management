@@ -18,6 +18,9 @@ public class Movie implements Serializable {
         this.price = price;
     }
 
+    public Movie() {
+    }
+
     public String getTitle() {
         return title;
     }

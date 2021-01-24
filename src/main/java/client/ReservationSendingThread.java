@@ -38,6 +38,7 @@ public class ReservationSendingThread extends Thread {
         } finally {
             try {
                 objectOutput.close();
+                this.socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

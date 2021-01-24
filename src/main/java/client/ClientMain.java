@@ -19,6 +19,7 @@ import javafx.util.Duration;
 import root.*;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ClientMain extends Application {
+    private final int WIDTH = 540;
+    private final int HEIGHT = 455;
 
     private MySQLAccess sql;
     private GridPane gridPane;
@@ -70,7 +73,6 @@ public class ClientMain extends Application {
     public ClientMain() throws SQLException, ClassNotFoundException, IOException {
         this.initComponents();
         this.initEvents();
-//        this.connection.start();
     }
 
     @Override
@@ -131,8 +133,8 @@ public class ClientMain extends Application {
         right.add(separator2, 0, 6);
         right.add(status, 0, 7);
 
-        primaryStage.setMinWidth(540);
-        primaryStage.setMinHeight(455);
+        primaryStage.setMinWidth(this.WIDTH);
+        primaryStage.setMinHeight(this.HEIGHT);
         gridPane.setPadding(new Insets(10, 10, 10, 10));
         gridPane.setHgap(10);
         gridPane.add(right, 0, 0);
@@ -149,12 +151,7 @@ public class ClientMain extends Application {
             this.statusLabel.setText("STATUS: Waiting for payment");
 
             if (this.nameInput.getText() == null || this.surnameInput.getText() == null || this.seats.getValue() == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Input error");
-                alert.setHeaderText("No data provided");
-                alert.setContentText("Fill all input field");
-                alert.showAndWait().ifPresent(rs -> {
-                });
+                new AlertWindow(Alert.AlertType.ERROR, "Error", "No data provided", "Fill all input fields");
             } else {
 
 
@@ -167,11 +164,7 @@ public class ClientMain extends Application {
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 } catch (NullPointerException nullError) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("SQL error");
-                    alert.setContentText("Cannot connect to database");
-                    alert.showAndWait().ifPresent(rs -> {
-                    });
+                    new AlertWindow(Alert.AlertType.ERROR, "Error", "SQL error", "Cannot connect to database");
                 }
 
                 this.client.setFirstName(this.nameInput.getText());
@@ -188,12 +181,7 @@ public class ClientMain extends Application {
                 this.connection.start();
                 this.connection.send(this.reservation);
 
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Confirm");
-                alert.setHeaderText("Succesfull");
-                alert.setContentText("Reservation saved, now You can pay");
-                alert.showAndWait().ifPresent(rs -> {
-                });
+                new AlertWindow(Alert.AlertType.CONFIRMATION, "Confirm", "Succesfull", "Reservation saved, now You can pay");
             }
         });
 
@@ -201,14 +189,7 @@ public class ClientMain extends Application {
             this.counterStarted = false;
             this.counter = 60 * 2;
             this.statusLabel.setText("STATUS: Reservation made");
-
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirm");
-            alert.setHeaderText("Succesfull");
-            alert.setContentText("Reservation made");
-            alert.showAndWait().ifPresent(rs -> {
-            });
-
+            new AlertWindow(Alert.AlertType.CONFIRMATION, "Confirm", "Succesfull", "Reservation made");
         });
 
         this.datePicker.valueProperty().addListener((ov, oldv, newv) -> {
@@ -303,7 +284,12 @@ public class ClientMain extends Application {
         this.counterStarted = false;
         this.client = new Client();
         this.reservation = new Reservation();
-        this.connection = new ReservationSendingThread();
+        try {
+            this.connection = new ReservationSendingThread();
+        } catch (ConnectException e) {
+            new AlertWindow(Alert.AlertType.ERROR, "Error", "Connection error", "Server is turned off");
+        }
+
     }
 
     public static void main(String[] args) {

@@ -155,6 +155,25 @@ public class MySQLAccess {
         return list;
     }
 
+    public Client getClientByNames(String first, String last) throws SQLException {
+        String sql = "SELECT * FROM client WHERE first_name = ? AND last_name = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, first);
+        preparedStatement.setString(2, last);
+
+        resultSet = preparedStatement.executeQuery();
+
+        Client c = null;
+        while (resultSet.next()) {
+            String fname = resultSet.getString("first_name");
+            String lname = resultSet.getString("last_name");
+            Date d = Date.valueOf(resultSet.getString("birth_date"));
+
+            c = new Client(fname, lname, d);
+        }
+        return c;
+    }
+
     public List<Reservation> getAllReservations() throws SQLException {
         resultSet = statement.executeQuery("SELECT * FROM reservation");
         ResultSet temp;

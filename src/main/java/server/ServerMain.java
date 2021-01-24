@@ -1,66 +1,238 @@
 package server;
 
 import javafx.application.Application;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import root.*;
+
+import java.io.IOException;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ServerMain extends Application {
-    private final int WIDTH = 580;
-    private final int HEIGHT = 300;
+    private final int WIDTH = 1640;
+    private final int HEIGHT = 485;
+
+    private MySQLAccess sql;
+    private GridPane root;
+    private GridPane leftGrid;
+    private VBox buttonList;
+    private TableView hallTable;
+    private TableColumn<Hall, String> hallCol1;
+    private TableColumn<Hall, String> hallCol2;
+    private TableColumn<Hall, String> hallCol3;
+    private TableView movieTable;
+    private TableColumn<Movie, String> movieCol1;
+    private TableColumn<Movie, String> movieCol2;
+    private TableColumn<Movie, String> movieCol3;
+    private TableColumn<Movie, String> movieCol4;
+    private TableColumn<Movie, String> movieCol5;
+    private TableView clientTable;
+    private TableColumn<Client, String> clientCol1;
+    private TableColumn<Client, String> clientCol2;
+    private TableColumn<Client, String> clientCol3;
+    private TableView reservationTable;
+    private TableColumn<Reservation, String> reservationCol1;
+    private TableColumn<Reservation, String> reservationCol2;
+    private TableColumn<Reservation, String> reservationCol3;
+    private TableColumn<Reservation, String> reservationCol4;
+    private TableColumn<Reservation, String> reservationCol5;
+    private TableColumn<Reservation, String> reservationCol6;
+    private TableColumn<Reservation, String> reservationCol7;
+    private Label hallsLabel;
+    private Label moviesLabel;
+    private Label clientsLabel;
+    private Label reservationsLabel;
+    private Label optionsLabel;
+    private Button addHallButton;
+    private Button addMovieButton;
+    private Server server;
+    private Thread serverThread;
+
+    public ServerMain() throws SQLException, ClassNotFoundException, IOException {
+        this.initComponents();
+        this.initEvents();
+        this.server = new Server();
+        this.serverThread = new Thread(this.server);
+        this.serverThread.start();
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        GridPane root = new GridPane();
-        GridPane leftGrid = new GridPane();
-        HBox inputHall = new HBox();
-        HBox inputMovie = new HBox();
-        VBox info = new VBox();
 
-        TextField hallNumber = new TextField();
-        TextField movieTitle = new TextField();
-        Label hallInfo = new Label("Hall number: ");
-        Label movieInfo = new Label("Movie title: ");
-        Button addHallButton = new Button("Add hall");
-        Button addMovieButton = new Button("Add movie");
-        ListView<String> hallList = new ListView<>();
-        hallList.getItems().addAll("Hall 1", "Hall 2", "Hall 3", "Hall 4");
+        hallTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        movieTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        clientTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        reservationTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        inputHall.setSpacing(10);
-        inputHall.setAlignment(Pos.CENTER);
-        inputHall.getChildren().addAll(hallInfo, hallNumber, addHallButton);
+        hallCol1.setCellValueFactory(new PropertyValueFactory<>("hallNumber"));
+        hallCol2.setCellValueFactory(new PropertyValueFactory<>("seatsNumber"));
+        hallCol3.setCellValueFactory(new PropertyValueFactory<>("availableSeats"));
+        this.hallTable.getColumns().addAll(hallCol1, hallCol2, hallCol3);
+        List<Hall> halls = sql.getAllHalls();
+        this.hallTable.getItems().addAll(halls);
 
-        inputMovie.setSpacing(10);
-        inputMovie.setAlignment(Pos.CENTER);
-        inputMovie.getChildren().addAll(movieInfo, movieTitle, addMovieButton);
+        this.movieCol1.setCellValueFactory(new PropertyValueFactory<>("title"));
+        this.movieCol2.setCellValueFactory(new PropertyValueFactory<>("ageCategory"));
+        this.movieCol3.setCellValueFactory(new PropertyValueFactory<>("length"));
+        this.movieCol4.setCellValueFactory(new PropertyValueFactory<>("genre"));
+        this.movieCol5.setCellValueFactory(new PropertyValueFactory<>("price"));
+        this.movieTable.getColumns().addAll(movieCol1, movieCol2, movieCol3, movieCol4, movieCol5);
+        List<Movie> movies = sql.getAllMovies();
+        this.movieTable.getItems().addAll(movies);
 
-        info.setAlignment(Pos.CENTER);
-        info.getChildren().addAll(new Label("Info:"), new Label("Hall 1"), new Label("All seats: 50"), new Label("Available seats: 25"));
 
+        clientCol1.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        clientCol2.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        clientCol3.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
+        this.clientTable.getColumns().addAll(clientCol1, clientCol2, clientCol3);
+        List<Client> clients = sql.getAllClients();
+        clientTable.getItems().addAll(clients);
+
+        reservationCol1.setCellValueFactory(new PropertyValueFactory<>("hallId"));
+        reservationCol2.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        reservationCol3.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        reservationCol4.setCellValueFactory(new PropertyValueFactory<>("title"));
+        reservationCol5.setCellValueFactory(new PropertyValueFactory<>("seats"));
+        reservationCol6.setCellValueFactory(new PropertyValueFactory<>("date"));
+        reservationCol7.setCellValueFactory(new PropertyValueFactory<>("price"));
+        this.reservationTable.getColumns().addAll(reservationCol1, reservationCol2, reservationCol3, reservationCol4, reservationCol5, reservationCol6, reservationCol7);
+        List<Reservation> res = sql.getAllReservations();
+        List<ReservationData> reservations = res.stream()
+                .map(r -> new ReservationData(r.getCinemaHall().getHallNumber(), r.getClient().getFirstName(), r.getClient().getLastName(), r.getMovie().getTitle(), r.getSeatNumber(), r.getDate(), r.getPrice()))
+                .collect(Collectors.toList());
+        reservationTable.getItems().addAll(reservations);
+
+
+        addHallButton.setFont(new Font("Arial", 15));
+        addMovieButton.setFont(new Font("Arial", 15));
+
+        buttonList.getChildren().addAll(addHallButton, addMovieButton);
+        buttonList.setAlignment(Pos.CENTER);
+        buttonList.setSpacing(10);
+        leftGrid.setPadding(new Insets(20, 20, 20, 20));
         leftGrid.setVgap(10);
-        leftGrid.add(inputHall, 0, 0);
-        leftGrid.add(inputMovie, 0, 1);
-        leftGrid.add(info, 0, 2);
+        leftGrid.add(buttonList, 0, 0);
 
+        root.setHalignment(hallsLabel, HPos.CENTER);
+        root.setHalignment(moviesLabel, HPos.CENTER);
+        root.setHalignment(clientsLabel, HPos.CENTER);
+        root.setHalignment(reservationsLabel, HPos.CENTER);
+        root.setHalignment(optionsLabel, HPos.CENTER);
+
+        hallsLabel.setFont(new Font("Arial", 20));
+        moviesLabel.setFont(new Font("Arial", 20));
+        clientsLabel.setFont(new Font("Arial", 20));
+        reservationsLabel.setFont(new Font("Arial", 20));
+        optionsLabel.setFont(new Font("Arial", 20));
 
         root.setPadding(new Insets(10, 10, 10, 10));
-        root.add(leftGrid, 0, 0);
-        root.add(hallList, 1, 0);
+        root.add(optionsLabel, 0, 0);
+        root.add(leftGrid, 0, 1);
+        root.add(hallsLabel, 1, 0);
+        root.add(moviesLabel, 2, 0);
+        root.add(clientsLabel, 3, 0);
+        root.add(reservationsLabel, 4, 0);
+        root.add(hallTable, 1, 1);
+        root.add(movieTable, 2, 1);
+        root.add(clientTable, 3, 1);
+        root.add(reservationTable, 4, 1);
 
-
+        primaryStage.setMinWidth(this.WIDTH);
+        primaryStage.setMinHeight(this.HEIGHT);
         primaryStage.setTitle("Server");
-        primaryStage.setScene(new Scene(root, WIDTH, HEIGHT));
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 
+    public void initEvents() {
+        this.addHallButton.setOnAction(actionEvent -> {
+            try {
+                new HallWindow(this);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+
+        this.addMovieButton.setOnAction(actionEvent -> {
+            try {
+                new MovieWindow(this);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void initComponents() throws SQLException, ClassNotFoundException, IOException {
+        this.sql = new MySQLAccess();
+        this.root = new GridPane();
+        this.leftGrid = new GridPane();
+        this.buttonList = new VBox();
+        this.hallTable = new TableView();
+        this.hallCol1 = new TableColumn<>("Hall number");
+        this.hallCol2 = new TableColumn<>("Seats");
+        this.hallCol3 = new TableColumn<>("Available");
+        this.movieTable = new TableView();
+        this.movieCol1 = new TableColumn<>("Title");
+        this.movieCol2 = new TableColumn<>("Age");
+        this.movieCol3 = new TableColumn<>("Length");
+        this.movieCol4 = new TableColumn<>("Genre");
+        this.movieCol5 = new TableColumn<>("Price");
+        this.clientTable = new TableView();
+        this.clientCol1 = new TableColumn<>("First name");
+        this.clientCol2 = new TableColumn<>("Last name");
+        this.clientCol3 = new TableColumn<>("Birthdate");
+        this.reservationTable = new TableView();
+        this.reservationCol1 = new TableColumn<>("Hall number");
+        this.reservationCol2 = new TableColumn<>("First name");
+        this.reservationCol3 = new TableColumn<>("Last name");
+        this.reservationCol4 = new TableColumn<>("Title");
+        this.reservationCol5 = new TableColumn<>("Seats");
+        this.reservationCol6 = new TableColumn<>("Date");
+        this.reservationCol7 = new TableColumn<>("Price");
+        this.hallsLabel = new Label("Halls");
+        this.moviesLabel = new Label("Movies");
+        this.clientsLabel = new Label("Clients");
+        this.optionsLabel = new Label("Options");
+        this.reservationsLabel = new Label("Reservations");
+        this.addHallButton = new Button("Add hall");
+        this.addMovieButton = new Button("Add movie");
+//        this.server = new Server();
+    }
+
+    public void refreshTables() throws SQLException {
+        this.hallTable.getItems().clear();
+        this.movieTable.getItems().clear();
+        this.clientTable.getItems().clear();
+        this.reservationTable.getItems().clear();
+        List<Hall> halls = sql.getAllHalls();
+        this.hallTable.getItems().addAll(halls);
+        List<Movie> movies = sql.getAllMovies();
+        this.movieTable.getItems().addAll(movies);
+        List<Client> clients = sql.getAllClients();
+        clientTable.getItems().addAll(clients);
+        List<Reservation> res = sql.getAllReservations();
+        List<ReservationData> reservations = res.stream()
+                .map(r -> new ReservationData(r.getCinemaHall().getHallNumber(), r.getClient().getFirstName(), r.getClient().getLastName(), r.getMovie().getTitle(), r.getSeatNumber(), r.getDate(), r.getPrice()))
+                .collect(Collectors.toList());
+        reservationTable.getItems().addAll(reservations);
+    }
 
     public static void main(String[] args) {
         launch(args);
