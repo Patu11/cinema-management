@@ -1,6 +1,7 @@
 package root;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 
 public class Hall implements Serializable {
     private int hallNumber;
@@ -45,8 +46,15 @@ public class Hall implements Serializable {
         this.availableSeats = availableSeats;
     }
 
-    public void decreaseAvailableSeats() {
-        this.availableSeats -= 1;
+    public boolean decreaseAvailableSeats(int seats) throws SQLException, ClassNotFoundException {
+        if (this.availableSeats - seats >= 0) {
+            this.availableSeats -= seats;
+            MySQLAccess sql = new MySQLAccess();
+            sql.updateHallAvailableSeatsByNumber(this.hallNumber, this.availableSeats);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

@@ -11,12 +11,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import root.*;
 
 import java.io.IOException;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +27,7 @@ public class ServerMain extends Application {
     private GridPane root;
     private GridPane leftGrid;
     private VBox buttonList;
+    private HBox deleteList;
     private TableView hallTable;
     private TableColumn<Hall, String> hallCol1;
     private TableColumn<Hall, String> hallCol2;
@@ -58,15 +57,24 @@ public class ServerMain extends Application {
     private Label optionsLabel;
     private Button addHallButton;
     private Button addMovieButton;
+    private Button refreshButton;
+    private Button deleteHall;
+    private Button deleteMovie;
     private Server server;
     private Thread serverThread;
+    private Reservation reservation;
 
     public ServerMain() throws SQLException, ClassNotFoundException, IOException {
         this.initComponents();
         this.initEvents();
-        this.server = new Server();
+        this.server = new Server(this);
         this.serverThread = new Thread(this.server);
         this.serverThread.start();
+    }
+
+    public void setReservation(Reservation reservation) throws SQLException {
+        this.reservation = reservation;
+//        System.out.println(this.reservation);
     }
 
     @Override
@@ -118,13 +126,20 @@ public class ServerMain extends Application {
 
         addHallButton.setFont(new Font("Arial", 15));
         addMovieButton.setFont(new Font("Arial", 15));
+        refreshButton.setFont(new Font("Arial", 15));
+        deleteHall.setFont(new Font("Arial", 15));
+        deleteMovie.setFont(new Font("Arial", 15));
 
-        buttonList.getChildren().addAll(addHallButton, addMovieButton);
+        this.deleteList.setSpacing(10);
+        this.deleteList.getChildren().addAll(deleteHall, deleteMovie);
+
+        buttonList.getChildren().addAll(addHallButton, addMovieButton, refreshButton);
         buttonList.setAlignment(Pos.CENTER);
         buttonList.setSpacing(10);
         leftGrid.setPadding(new Insets(20, 20, 20, 20));
         leftGrid.setVgap(10);
         leftGrid.add(buttonList, 0, 0);
+        leftGrid.add(this.deleteList, 0, 1);
 
         root.setHalignment(hallsLabel, HPos.CENTER);
         root.setHalignment(moviesLabel, HPos.CENTER);
@@ -157,7 +172,8 @@ public class ServerMain extends Application {
         primaryStage.show();
     }
 
-    public void initEvents() {
+    private void initEvents() {
+
         this.addHallButton.setOnAction(actionEvent -> {
             try {
                 new HallWindow(this);
@@ -177,13 +193,47 @@ public class ServerMain extends Application {
                 e.printStackTrace();
             }
         });
+
+        this.refreshButton.setOnAction(actionEvent -> {
+            try {
+                this.refreshTables();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        });
+
+        this.deleteHall.setOnAction(actionEvent -> {
+            Hall h = (Hall) this.hallTable.getSelectionModel().getSelectedItem();
+            if (h != null) {
+                try {
+                    this.sql.deleteHallByNumber(h.getHallNumber());
+                    this.hallTable.getItems().remove(h);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        });
+
+        this.deleteMovie.setOnAction(actionEvent -> {
+            Movie m = (Movie) this.movieTable.getSelectionModel().getSelectedItem();
+            if (m != null) {
+                try {
+                    this.sql.deleteMovieByTitle(m.getTitle());
+                    this.movieTable.getItems().remove(m);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        });
+
     }
 
-    public void initComponents() throws SQLException, ClassNotFoundException, IOException {
+    private void initComponents() throws SQLException, ClassNotFoundException, IOException {
         this.sql = new MySQLAccess();
         this.root = new GridPane();
         this.leftGrid = new GridPane();
         this.buttonList = new VBox();
+        this.deleteList = new HBox();
         this.hallTable = new TableView();
         this.hallCol1 = new TableColumn<>("Hall number");
         this.hallCol2 = new TableColumn<>("Seats");
@@ -213,7 +263,10 @@ public class ServerMain extends Application {
         this.reservationsLabel = new Label("Reservations");
         this.addHallButton = new Button("Add hall");
         this.addMovieButton = new Button("Add movie");
-//        this.server = new Server();
+        this.refreshButton = new Button("Refresh table");
+        this.deleteHall = new Button("Delete hall");
+        this.deleteMovie = new Button("Delete movie");
+        this.reservation = null;
     }
 
     public void refreshTables() throws SQLException {

@@ -1,6 +1,7 @@
 package root;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.Date;
 
 public class Reservation implements Runnable, Serializable {
@@ -26,11 +27,12 @@ public class Reservation implements Runnable, Serializable {
 
     @Override
     public void run() {
-        if (cinemaHall.getAvailableSeats() >= 0) {
-            System.out.println(this.client.getFirstName() + " reserved: " + this.seatNumber + " seats on movie: " + this.movie.getTitle());
-            cinemaHall.decreaseAvailableSeats();
-        } else {
-            System.out.println(this.client.getFirstName() + " cannot reserve");
+        try {
+            if (this.cinemaHall.getAvailableSeats() > 0 && this.cinemaHall.decreaseAvailableSeats(this.seatNumber) && this.seatNumber > 0) {
+            } else {
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

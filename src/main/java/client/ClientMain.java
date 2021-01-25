@@ -3,6 +3,7 @@ package client;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -75,6 +76,23 @@ public class ClientMain extends Application {
         this.initEvents();
     }
 
+    public void handleResponse(String response) {
+        if (!response.isEmpty()) {
+            if (response.equals("OK")) {
+                //change pay button flag
+                Platform.runLater(() -> {
+                    new AlertWindow(Alert.AlertType.CONFIRMATION, "Confirm", "Succesfull", "Reservation saved, now You can pay");
+                });
+
+            } else if (response.equals("BLOCKED")) {
+                //change pay button flag
+                Platform.runLater(() -> {
+                    new AlertWindow(Alert.AlertType.INFORMATION, "Information", "Taken", "Can't reserve");
+                });
+            }
+        }
+    }
+
     @Override
     public void start(Stage primaryStage) {
 
@@ -145,12 +163,11 @@ public class ClientMain extends Application {
     }
 
     public void initEvents() {
-
         this.reserve.setOnAction(actionEvent -> {
             this.counterStarted = true;
             this.statusLabel.setText("STATUS: Waiting for payment");
 
-            if (this.nameInput.getText() == null || this.surnameInput.getText() == null || this.seats.getValue() == null) {
+            if (this.nameInput.getText() == null || this.nameInput.getText().trim().isEmpty() || this.surnameInput.getText() == null || this.surnameInput.getText().trim().isEmpty() || this.seats.getValue() == null) {
                 new AlertWindow(Alert.AlertType.ERROR, "Error", "No data provided", "Fill all input fields");
             } else {
 
@@ -181,15 +198,21 @@ public class ClientMain extends Application {
                 this.connection.start();
                 this.connection.send(this.reservation);
 
-                new AlertWindow(Alert.AlertType.CONFIRMATION, "Confirm", "Succesfull", "Reservation saved, now You can pay");
             }
         });
 
         this.pay.setOnAction(actionEvent -> {
             this.counterStarted = false;
             this.counter = 60 * 2;
+            this.counterLabel.setText("Payment made");
             this.statusLabel.setText("STATUS: Reservation made");
-            new AlertWindow(Alert.AlertType.CONFIRMATION, "Confirm", "Succesfull", "Reservation made");
+            try {
+                this.sql.insertClient(this.reservation.getClient());
+                this.sql.insertReservation(this.reservation);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+            new AlertWindow(Alert.AlertType.CONFIRMATION, "Confirm", "Succesfull", "Payment made");
         });
 
         this.datePicker.valueProperty().addListener((ov, oldv, newv) -> {
@@ -237,6 +260,19 @@ public class ClientMain extends Application {
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.seconds(1.0), e -> {
                     if (this.counterStarted) {
+                        if (this.counter == 0) {
+                            this.counterStarted = false;
+                            this.counterLabel.setText("Payment not made");
+                            this.pay.setDisable(true);
+                            try {
+                                sql.addHallAvailableSeatsByNumber(this.reservation.getCinemaHall().getHallNumber(), this.reservation.getSeatNumber());
+                                Platform.runLater(() -> {
+                                    new AlertWindow(Alert.AlertType.INFORMATION, "Information", "Rejected", "Payment not made");
+                                });
+                            } catch (SQLException throwables) {
+                                throwables.printStackTrace();
+                            }
+                        }
                         this.counterLabel.setText("Time to pay: " + this.counter + "s");
                         this.counter--;
                     }
@@ -244,6 +280,14 @@ public class ClientMain extends Application {
         );
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
+
+        this.datePicker.setDayCellFactory(picker -> new DateCell() {
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                LocalDate today = LocalDate.now();
+                setDisable(empty || date.compareTo(today) < 0);
+            }
+        });
     }
 
     public void initComponents() throws SQLException, ClassNotFoundException, IOException {
@@ -265,7 +309,8 @@ public class ClientMain extends Application {
         this.seats = new ComboBox<>();
         this.halls = new ComboBox<>();
         this.movieInfo = new Label("Movie: ");
-        this.counterLabel = new Label("Time to pay: 120s");
+        this.counter = 10;
+        this.counterLabel = new Label("Time to pay: " + this.counter + "s");
         this.infoLabel = new Label("Your reservation:");
         this.titleLabel = new Label("Title:");
         this.dateLabel = new Label("Date:");
@@ -280,12 +325,11 @@ public class ClientMain extends Application {
         this.hallList = sql.getAllHalls().stream().map(Hall::getHallNumber).collect(Collectors.toList());
         this.h = FXCollections.observableArrayList(hallList);
         this.items = FXCollections.observableArrayList(movieList);
-        this.counter = 60 * 2;
         this.counterStarted = false;
         this.client = new Client();
         this.reservation = new Reservation();
         try {
-            this.connection = new ReservationSendingThread();
+            this.connection = new ReservationSendingThread(this);
         } catch (ConnectException e) {
             new AlertWindow(Alert.AlertType.ERROR, "Error", "Connection error", "Server is turned off");
         }

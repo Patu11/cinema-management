@@ -46,7 +46,6 @@ public class MySQLAccess {
 
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
-
         preparedStatement.setInt(1, hall.getSeatsNumber());
         preparedStatement.setInt(2, hall.getAvailableSeats());
 
@@ -63,6 +62,97 @@ public class MySQLAccess {
         preparedStatement.setInt(3, movie.getLength());
         preparedStatement.setString(4, movie.getGenre());
         preparedStatement.setDouble(5, movie.getPrice());
+
+        preparedStatement.executeUpdate();
+    }
+
+    public void deleteMovieByTitle(String title) throws SQLException {
+        String sql = "DELETE FROM movie where title = ?";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        preparedStatement.setString(1, title);
+
+        preparedStatement.executeUpdate();
+    }
+
+    public void deleteHallByNumber(int number) throws SQLException {
+        String sql = "DELETE FROM hall where hall_id = ?";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        preparedStatement.setInt(1, number);
+
+        preparedStatement.executeUpdate();
+    }
+
+    public int getMovieIdByTitle(String title) throws SQLException {
+        String sql = "SELECT movie_id FROM movie WHERE title = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, title);
+
+        resultSet = preparedStatement.executeQuery();
+
+        while (resultSet.next()) {
+            int id = resultSet.getInt("movie_id");
+            return id;
+        }
+        return -1;
+    }
+
+    public int getClientIdByNameAndSurname(String name, String surname) throws SQLException {
+        String sql = "SELECT client_id FROM client WHERE first_name = ? AND last_name = ?";
+//        System.out.println("SELECT client_id FROM client WHERE first_name = " + name + " AND last_name = " + surname);
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, name);
+        preparedStatement.setString(2, surname);
+
+        resultSet = preparedStatement.executeQuery();
+
+        while (resultSet.next()) {
+            int id = resultSet.getInt("client_id");
+            return id;
+        }
+        return -1;
+    }
+
+    public void insertReservation(Reservation reservation) throws SQLException {
+        String sql = "INSERT INTO reservation(hall_id, movie_id, client_id, res_date, seat_number,price) VALUES(?,?,?,?,?,?)";
+
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        int movieId = this.getMovieIdByTitle(reservation.getMovie().getTitle());
+        int clientId = this.getClientIdByNameAndSurname(reservation.getClient().getFirstName(), reservation.getClient().getLastName());
+
+        preparedStatement.setInt(1, reservation.getCinemaHall().getHallNumber());
+        preparedStatement.setInt(2, movieId);
+        preparedStatement.setInt(3, clientId);
+        preparedStatement.setDate(4, (Date) reservation.getDate());
+        preparedStatement.setInt(5, reservation.getSeatNumber());
+        preparedStatement.setDouble(6, reservation.getPrice());
+
+        preparedStatement.executeUpdate();
+    }
+
+    public void addHallAvailableSeatsByNumber(int number, int seats) throws SQLException {
+        String sql = "UPDATE hall SET available_seats = available_seats + ? WHERE hall_id = ?";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        preparedStatement.setInt(1, seats);
+        preparedStatement.setInt(2, number);
+
+        preparedStatement.executeUpdate();
+    }
+
+    public void updateHallAvailableSeatsByNumber(int number, int seats) throws SQLException {
+        String sql = "UPDATE hall SET available_seats = ? WHERE hall_id = ?";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        preparedStatement.setInt(1, seats);
+        preparedStatement.setInt(2, number);
 
         preparedStatement.executeUpdate();
     }
@@ -208,38 +298,5 @@ public class MySQLAccess {
         connection.close();
     }
 
-    public static void main(String[] args) throws Exception {
-        MySQLAccess sql = new MySQLAccess();
 
-//        List<Reservation> reservations = sql.getAllReservations();
-//        List<Client> clients = sql.getAllClients();
-//        List<Movie> movies = sql.getAllMovies();
-//        List<Hall> halls = sql.getAllHalls();
-//
-//        for (Client c : clients) {
-//            System.out.println(c.toString());
-//        }
-//
-//        for (Movie m : movies) {
-//            System.out.println(m.toString());
-//        }
-//
-//        for (Hall h : halls) {
-//            System.out.println(h.toString());
-//        }
-
-//        Movie m = new Movie("The Avengers", 12, 120, "Sci-Fi", 2.55);
-//        sql.insertMovie(m);
-
-//        Hall h = new Hall(85, 85);
-//        sql.insertHall(h);
-
-//        Client c = new Client("Kamil", "Slimak", Date.valueOf("1995-05-01"));
-//        sql.insertClient(c);
-
-
-        System.out.println(sql.getMovieByTitle("Matrix"));
-
-        sql.closeConnection();
-    }
 }
